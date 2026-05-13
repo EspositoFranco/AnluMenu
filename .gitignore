@@ -1,0 +1,22 @@
+# Unity meta files are needed for packages in Packages/ folder
+# but we only track them if Unity generated them
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.idea/
+.vs/
+*.suo
+*.user
+*.csproj
+*.sln
+
+# Unity
+Library/
+Temp/
+Logs/
+obj/
+Build/

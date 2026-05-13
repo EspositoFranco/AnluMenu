@@ -1,0 +1,25 @@
+{
+    "name": "com.anlu.menu",
+    "version": "2.0.0",
+    "displayName": "AnluMenu",
+    "description": "Reusable menu system for Unity: MainMenu, Pause, SceneLoader, Settings, Splash. Ships with extensible settings modules, multiplayer-aware pause, async scene loading with fade/progress, and optional Netcode for GameObjects integration via conditional compilation.",
+    "unity": "2022.3",
+    "author": {
+        "name": "Franco Esposito",
+        "url": "https://github.com/EspositoFranco"
+    },
+    "keywords": [
+        "menu",
+        "ui",
+        "pause",
+        "settings",
+        "scene-loader",
+        "splash",
+        "netcode"
+    ],
+    "dependencies": {
+        "com.unity.textmeshpro": "3.0.0",
+        "com.unity.inputsystem": "1.0.0"
+    },
+    "samples": []
+}

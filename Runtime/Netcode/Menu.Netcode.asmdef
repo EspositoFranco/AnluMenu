@@ -1,0 +1,25 @@
+{
+    "name": "AnluMenu.Netcode",
+    "rootNamespace": "AnluMenu.Netcode",
+    "references": [
+        "AnluMenu.Core",
+        "Unity.Netcode.Runtime"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [
+        "ANLU_MENU_USE_NETCODE"
+    ],
+    "versionDefines": [
+        {
+            "name": "com.unity.netcode.gameobjects",
+            "expression": "1.0.0",
+            "define": "ANLU_MENU_USE_NETCODE"
+        }
+    ],
+    "noEngineReferences": false
+}
