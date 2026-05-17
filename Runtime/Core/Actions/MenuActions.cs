@@ -52,10 +52,19 @@ namespace AnluMenu
             SceneLoader.Instance.Load(sceneName);
         }
 
-        /// <summary>Reloads the currently active scene through <see cref="SceneLoader"/>.</summary>
+        /// <summary>
+        /// Reloads the currently active scene. Bypasses the SceneLoader's configured minimum
+        /// loading duration so the restart feels instant (fade only, no artificial wait).
+        /// </summary>
         public static void RestartCurrentScene()
         {
-            LoadScene(SceneManager.GetActiveScene().name);
+            if (SceneLoader.Instance == null)
+            {
+                Debug.LogError("[MenuActions] No SceneLoader.Instance found. Add a SceneLoader to the bootstrap scene.");
+                return;
+            }
+            if (Time.timeScale == 0f) Time.timeScale = 1f;
+            SceneLoader.Instance.Load(SceneManager.GetActiveScene().name, 0f);
         }
     }
 }

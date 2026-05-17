@@ -83,14 +83,27 @@ namespace AnluMenu
             if (_loadingScreen) _loadingScreen.SetActive(false);
         }
 
-        /// <summary>Loads a scene asynchronously with fade and progress.</summary>
+        /// <summary>
+        /// Loads a scene asynchronously with fade and progress, using the configured
+        /// <see cref="_minimumLoadingDuration"/>.
+        /// </summary>
         public void Load(string sceneName)
         {
             if (string.IsNullOrEmpty(sceneName)) return;
-            StartCoroutine(LoadRoutine(sceneName));
+            StartCoroutine(LoadRoutine(sceneName, _minimumLoadingDuration));
         }
 
-        private IEnumerator LoadRoutine(string sceneName)
+        /// <summary>
+        /// Loads a scene asynchronously, overriding the minimum loading duration for this call only.
+        /// Pass <c>0f</c> for an instant load (e.g. level restart where no loading screen is needed).
+        /// </summary>
+        public void Load(string sceneName, float minimumDuration)
+        {
+            if (string.IsNullOrEmpty(sceneName)) return;
+            StartCoroutine(LoadRoutine(sceneName, Mathf.Max(0f, minimumDuration)));
+        }
+
+        private IEnumerator LoadRoutine(string sceneName, float minimumDuration)
         {
             if (_fader) yield return _fader.FadeIn();
 
@@ -117,7 +130,7 @@ namespace AnluMenu
                 if (op.progress >= 0.9f)
                 {
                     float elapsed = Time.unscaledTime - loadStartTime;
-                    bool timeReached = elapsed >= _minimumLoadingDuration;
+                    bool timeReached = elapsed >= minimumDuration;
 
                     if (_requireKeyToEnter)
                     {
