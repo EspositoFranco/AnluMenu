@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -11,6 +10,11 @@ namespace AnluMenu
     /// Maintains a navigation stack so <see cref="Back()"/> returns to the previous panel
     /// without hardcoding destinations. Buttons connect via standard Unity OnClick events.
     /// </summary>
+    /// <remarks>
+    /// This controller handles local navigation only. For Quit / LoadScene / RestartScene
+    /// use <see cref="MenuActionButton"/> (inspector) or <see cref="MenuActions"/> (code) —
+    /// those are reusable from any scene, including pause and gameplay.
+    /// </remarks>
     public class MenuController : MonoBehaviour
     {
         [Header("Panels")]
@@ -42,12 +46,6 @@ namespace AnluMenu
 
         /// <summary>Currently visible panel, or null before <see cref="Start"/>.</summary>
         public GameObject CurrentPanel { get; private set; }
-
-        /// <summary>
-        /// Fires when QuitGame is called on platforms where Application.Quit() does not work
-        /// (e.g. WebGL). Subscribe to show a "close this tab" message or redirect to a URL.
-        /// </summary>
-        public static event Action OnQuitRequested;
 
         private void Awake()
         {
@@ -90,32 +88,6 @@ namespace AnluMenu
             ShowOnly(panel);
             Audio.PlayClick();
             SelectFirstButton(panel);
-        }
-
-        /// <summary>Triggers an async scene load through <see cref="SceneLoader"/>.</summary>
-        public void LoadScene(string sceneName)
-        {
-            Audio.PlayClick();
-            if (SceneLoader.Instance != null) SceneLoader.Instance.Load(sceneName);
-            else Debug.LogError($"[MenuController] No SceneLoader.Instance found. Add a SceneLoader to the scene.");
-        }
-
-        /// <summary>
-        /// Quits the application. Handles platform differences:
-        /// Editor stops play mode, Desktop quits, WebGL fires <see cref="OnQuitRequested"/>.
-        /// </summary>
-        public void QuitGame()
-        {
-            Audio.PlayClick();
-#if UNITY_EDITOR
-            UnityEditor.EditorApplication.isPlaying = false;
-#elif UNITY_WEBGL
-            if (OnQuitRequested != null) { OnQuitRequested.Invoke(); return; }
-            Debug.LogWarning("[MenuController] Application.Quit() does not work on WebGL. " +
-                "Subscribe to MenuController.OnQuitRequested to handle this (e.g. redirect to a URL).");
-#else
-            Application.Quit();
-#endif
         }
 
         /// <summary>Replace the audio output at runtime (e.g. after instantiating an adapter).</summary>

@@ -5,6 +5,34 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.0] - 2026-05-17
+
+### Added
+- `MenuEvents` — static event bus for cross-cutting menu signals (`OpenSettings`, `Pause`, `PanelOpened`, etc.). Lets gameplay scripts request UI changes without holding references.
+- `MenuActions` — static façade with `Quit()`, `LoadScene(name)`, `RestartCurrentScene()`. Reusable from any scene; ensures `Time.timeScale` is restored before scene loads.
+- `MenuActionButton` — one component, dropdown-selected action (Quit / LoadScene / RestartCurrentScene / Open|Close|ToggleSettings / Pause|Resume|TogglePause). Wire the button's OnClick to `Trigger()`.
+- `TabController` — generic tab/panel switcher (Button + Panel + optional ActiveIndicator per tab). Not tied to Settings; reusable for any tabbed UI.
+- `ConfirmAction` — drop-in component that prepends a `ConfirmationDialog` to any button via `UnityEvent OnConfirmed/OnCancelled`. Falls back to direct invocation if no dialog exists.
+- `SettingsController`: `Show()`, `Hide()`, `Toggle()` — absorbs the former `SettingsOverlay` responsibilities.
+- `PauseController`: `IsPaused` guards prevent double pause/resume; `Key.None` disables the local keyboard shortcut.
+- `MenuEvents.OnPanelOpened/OnPanelClosed` notifications — emitted by `SettingsController` (`"settings"`) and `PauseController` (`"pause"`) for analytics, audio, or feedback hooks.
+
+### Changed
+- **BREAKING:** `MenuController` stripped down to local panel navigation. Removed `QuitGame()`, `LoadScene(string)`, and the static `OnQuitRequested` event. Use `MenuActions` / `MenuActionButton` instead.
+- **BREAKING:** `MenuController.OnQuitRequested` (WebGL hook) moved to `MenuActions.OnQuitRequested`.
+- **BREAKING:** `SettingsController` now lives on an always-active root and owns the panel via a `_panel` field. Subscribes to `MenuEvents.OnOpen/Close/ToggleSettingsRequested`. Modules are discovered from the `_panel` subtree, so they keep working inside tab containers.
+- `PauseController` subscribes to `MenuEvents.OnPause/Resume/TogglePauseRequested` — any system can request pause without a controller reference.
+- `MenuActions.LoadScene` resets `Time.timeScale` to 1 before loading (safety when called from pause).
+
+### Removed
+- **BREAKING:** `SettingsOverlay` — merged into `SettingsController`. Replace `SettingsOverlay.Instance.Toggle()` with `MenuEvents.RaiseToggleSettings()` or a direct `SettingsController` reference.
+
+### Migration
+- Buttons wired to `MenuController.QuitGame` → replace with `MenuActionButton` (`Action = Quit`).
+- Buttons wired to `MenuController.LoadScene` → replace with `MenuActionButton` (`Action = LoadScene`, `Scene Name = ...`).
+- WebGL hook `MenuController.OnQuitRequested += ...` → `MenuActions.OnQuitRequested += ...`.
+- Settings panel: remove `SettingsOverlay`; move `SettingsController` from the panel onto an always-active root and wire its `_panel` field to the actual panel GameObject.
+
 ## [2.0.0] - 2026-05-12
 
 ### Added

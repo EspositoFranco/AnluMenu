@@ -8,12 +8,17 @@ namespace AnluMenu
     /// In Multiplayer it only shows the overlay — the server clock keeps running.
     /// Optionally switches Input System action maps and manages cursor state.
     /// </summary>
+    /// <remarks>
+    /// Listens to <see cref="MenuEvents"/> so gameplay scripts can request pause without
+    /// holding a reference. For Quit / Restart / "Main Menu" buttons inside the pause UI,
+    /// add a <see cref="MenuActionButton"/> on each button instead of extending this class.
+    /// </remarks>
     public class PauseController : MonoBehaviour
     {
         [Tooltip("Root GameObject of the pause UI. Toggled on/off by this controller.")]
         [SerializeField] private GameObject _pauseMenu;
 
-        [Tooltip("Keyboard key that toggles pause.")]
+        [Tooltip("Keyboard key that toggles pause. Set to None to disable the local keyboard shortcut.")]
         [SerializeField] private Key _toggleKey = Key.Escape;
 
         [Tooltip("Optional audio output (same MonoBehaviour-implementing-IUIAudio pattern as MenuController).")]
@@ -35,6 +40,8 @@ namespace AnluMenu
 
         public bool IsPaused { get; private set; }
 
+        private const string PanelId = "pause";
+
         private IUIAudio _audio = new NullUIAudio();
 
         private void Awake()
@@ -43,8 +50,26 @@ namespace AnluMenu
             if (_pauseMenu) _pauseMenu.SetActive(false);
         }
 
+        private void OnEnable()
+        {
+            MenuEvents.OnPauseRequested       += Pause;
+            MenuEvents.OnResumeRequested      += Resume;
+            MenuEvents.OnTogglePauseRequested += Toggle;
+        }
+
+        private void OnDisable()
+        {
+            MenuEvents.OnPauseRequested       -= Pause;
+            MenuEvents.OnResumeRequested      -= Resume;
+            MenuEvents.OnTogglePauseRequested -= Toggle;
+
+            // Safety: never leave the engine paused if this controller is destroyed.
+            if (Time.timeScale == 0f) Time.timeScale = 1f;
+        }
+
         private void Update()
         {
+            if (_toggleKey == Key.None) return;
             if (Keyboard.current != null && Keyboard.current[_toggleKey].wasPressedThisFrame)
                 Toggle();
         }
@@ -55,6 +80,7 @@ namespace AnluMenu
         /// <summary>Pauses the game (freezes time only in SinglePlayer).</summary>
         public void Pause()
         {
+            if (IsPaused) return;
             IsPaused = true;
             if (_pauseMenu) _pauseMenu.SetActive(true);
             _audio.PlayClick();
@@ -69,11 +95,14 @@ namespace AnluMenu
                 Cursor.visible = true;
                 Cursor.lockState = CursorLockMode.None;
             }
+
+            MenuEvents.RaisePanelOpened(PanelId);
         }
 
         /// <summary>Resumes the game and restores Time.timeScale.</summary>
         public void Resume()
         {
+            if (!IsPaused) return;
             IsPaused = false;
             if (_pauseMenu) _pauseMenu.SetActive(false);
             _audio.PlayClick();
@@ -86,12 +115,8 @@ namespace AnluMenu
                 Cursor.visible = false;
                 Cursor.lockState = CursorLockMode.Locked;
             }
-        }
 
-        private void OnDisable()
-        {
-            // Safety: never leave the engine paused if this controller is destroyed.
-            if (Time.timeScale == 0f) Time.timeScale = 1f;
+            MenuEvents.RaisePanelClosed(PanelId);
         }
     }
 }
