@@ -75,7 +75,9 @@ namespace AnluMenu
         {
             if (Instance != null && Instance != this)
             {
-                Destroy(gameObject);
+                // Destroy only this component, not the whole GameObject.
+                // Destroying the GO is dangerous when SceneLoader shares a root with other components (e.g. HUD).
+                Destroy(this);
                 return;
             }
             Instance = this;

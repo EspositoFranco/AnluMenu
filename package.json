@@ -1,6 +1,6 @@
 {
     "name": "com.anlu.menu",
-    "version": "3.1.0",
+    "version": "3.1.1",
     "displayName": "AnluMenu",
     "description": "Reusable menu system for Unity: MainMenu, Pause, SceneLoader, Settings, Splash. Ships with extensible settings modules, multiplayer-aware pause, async scene loading with fade/progress, and optional Netcode for GameObjects integration via conditional compilation.",
     "unity": "2022.3",
